@@ -422,6 +422,8 @@ class TicTacTeo(SymbolicEnvironment):
                 actprob[actidx]=0
         
         actprob = actprob / np.sum(actprob)
+        print("act1----",actprob)
+        actprob[np.isnan(actprob)] = 0
         action_index = np.random.choice(range(self.action_n), p=actprob)
         action = self.all_actions[action_index]
         ###
