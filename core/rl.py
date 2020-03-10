@@ -118,8 +118,10 @@ class ReinforceLearner(object):
                     valuation = self.agent.base_valuation + self.agent.axioms2valuation(self.env.state2atoms(self.env.state))
                 action_prob,result = sess.run([self.tf_action_prob, self.agent.tf_result_valuation], feed_dict={self.agent.tf_input_valuation: [valuation],self.tf_actions_valuation_indexes: [indexes]})           
             
-            actprob = copy.deepcopy(action_prob)
             action_prob = action_prob[0]
+            actprob = copy.deepcopy(action_prob)
+            #normact = actprob/np.sum(actprob)
+            #print("normact---",normact)
             action_index = np.random.choice(range(self.env.action_n), p=action_prob)
 
             if self.state_encoding == "terms":
@@ -133,12 +135,14 @@ class ReinforceLearner(object):
                     action = np.random.choice(self.env.all_actions)
             steps.append(step)
             state_history.append(self.env.state)
-            reward, finished = self.env.next_step(action)
             ###
             # if env == tictactoe
             ###
             if self.env.__class__.__name__=='TicTacTeo':
+                print('TicTacEnv----')
                 reward, finished = self.env.next_step(actprob)
+            else:
+                reward, finished = self.env.next_step(action)
             reward_history.append(reward)
             action_history.append(action_index)
             action_trajectory_prob.append(action_prob[action_index])
@@ -229,9 +233,18 @@ class ReinforceLearner(object):
             # and in it call
 
     def evaluate(self, repeat=5):
-        results = []
+        def printval(file,data):
+            doc = open(file,'w')
+            print(data,file = doc)
+            doc.close()
         repeat = self.repeat
+        results = []
+
         with tf.Session() as sess:
+            Reli = []
+            Actli = []
+            Acttrajli = []
+            Stateli = []
             self.setup_train(sess)
             self.agent.log(sess)
             rules = self.agent.get_predicates_definition(sess, threshold=0.05) if self.type == "DILP" else []
@@ -240,7 +253,27 @@ class ReinforceLearner(object):
                 reward_history, action_history, action_prob_history, state_history, \
                 valuation_history, valuation_index_history, input_vector_history, returns, steps, adv, final_return = e
                 results.append(final_return)
+                Reli.append(reward_history)
+                Actli.append(action_history)
+                Acttrajli.append(action_prob_history)
+                Stateli.append(state_history)
         unique, counts = np.unique(results, return_counts=True)
+        try:
+            printval("reli,txt",np.array(Reli))
+        except:
+            print("Reli++++",Reli)
+        try:
+            printval("Actli.txt",np.array(Actli))
+        except:
+            print("Actli+++++++",Actli)
+        try:
+            printval("acttraj.txt",np.array(Acttrajli))
+        except:
+            print("Acttrajli+++++++++",Acttrajli)
+        try:
+            printval("state.txt",np.array(Stateli))
+        except:
+            print("Stateli+++++++++++++",Stateli)
         distribution =  dict(zip(unique, counts))
         return {"distribution": distribution, "mean": np.mean(results), "std": np.std(results),
                 "min": np.min(results), "max": np.max(results), "rules": rules}
@@ -290,11 +323,14 @@ class ReinforceLearner(object):
 
     def train(self):
         with tf.Session() as sess:
+            trainRes = []
             self.setup_train(sess)
             self.minibatch_buffer = self.get_minibatch_buffer(sess, batch_size=self.batch_size,
                                                               end_by_episode=self.end_by_episode)
             for i in range(self.total_steps):
                 log = self.train_step(sess)
+                trainRes.append(log["return"])
+
                 print("-"*20)
                 print("step "+str(i)+"return is "+str(log["return"]))
                 if (i+1)%self.log_steps==0:
@@ -304,6 +340,7 @@ class ReinforceLearner(object):
                         self.save(sess, path)
                     pprint(log)
                 print("-"*20+"\n")
+            np.savetxt("trainres.txt",np.array(trainRes))
         return log["return"]
 
 class NeuralCritic(object):
