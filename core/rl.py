@@ -145,7 +145,7 @@ class ReinforceLearner(object):
             ###
             if self.env.__class__.__name__=='TicTacTeo':
                 print('TicTacEnv----')
-                reward, finished = self.env.next_step(actprob)
+                action_index, reward, finished = self.env.next_step(actprob)
             else:
                 reward, finished = self.env.next_step(action)
             reward_history.append(reward)

@@ -449,12 +449,17 @@ class TicTacTeo(SymbolicEnvironment):
         if finished:
             return reward, finished
         valids = self.get_valid()
+        if len(valids)==0:
+            finished =True
         if tuple2int(action.terms) in valids:
             self._state[tuple2int(action.terms)] = 1
         else:
             print("wulosay--------------++++++")
         self.random_move(self.know_valid_pos)
-        return reward, finished
+        valids = self.get_valid()
+        if len(valids)==0:
+            finished =True
+        return action_index, reward, finished
 
     def get_valid(self):
         return [(x,y) for x,y in self.all_positions if self._state[x,y]==0]
