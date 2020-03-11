@@ -90,11 +90,15 @@ class ReinforceLearner(object):
     def grad(self):
         loss_value = self.tf_loss
         weight_decay = 0.0
+        scale = 1
         regularization = 0
         for weights in self.agent.all_variables():
             weights = tf.nn.softmax(weights)
+            ## like L1 reg
             regularization += tf.reduce_sum(tf.sqrt(weights))*weight_decay
-        loss_value += regularization/len(self.agent.all_variables())
+            ## reg1 = tf.reduce_sum(tf.abs(weights))*weight_decay
+            ## reg2 = tf.reduce_sum(tf.square(weights))*weight_decay
+        loss_value += scale*regularization/len(self.agent.all_variables())
         return tf.gradients(loss_value, self.agent.all_variables())
 
     def sample_episode(self, sess, max_steps=99999):
