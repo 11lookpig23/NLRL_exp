@@ -5,6 +5,7 @@ import pickle
 import json
 import numpy as np
 import copy
+from core.plotana import plottrain
 
 def totuple(a):
     try:
@@ -89,14 +90,14 @@ class ReinforceLearner(object):
 
     def grad(self):
         loss_value = self.tf_loss
-        weight_decay = 0.0
+        weight_decay = 0.015
         scale = 1
         regularization = 0
         for weights in self.agent.all_variables():
             weights = tf.nn.softmax(weights)
             ## like L1 reg
-            regularization += tf.reduce_sum(tf.sqrt(weights))*weight_decay
-            ## reg1 = tf.reduce_sum(tf.abs(weights))*weight_decay
+            ## regularization += tf.reduce_sum(tf.sqrt(weights))*weight_decay
+            regularization = tf.reduce_sum(tf.abs(weights))*weight_decay
             ## reg2 = tf.reduce_sum(tf.square(weights))*weight_decay
         loss_value += scale*regularization/len(self.agent.all_variables())
         return tf.gradients(loss_value, self.agent.all_variables())
@@ -344,6 +345,10 @@ class ReinforceLearner(object):
                         self.save(sess, path)
                     pprint(log)
                 print("-"*20+"\n")
+            try:
+                plottrain(np.array(trainRes),self.repeat,self.total_steps)
+            except:
+                print("oh,no,train....")
             np.savetxt("trainres.txt",np.array(trainRes))
         return log["return"]
 

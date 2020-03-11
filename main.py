@@ -54,7 +54,7 @@ def start_DILP(task, name, mode, logstep, rep, variation=None):
             critic = NeuralCritic([20], env.state_dim, 1.0, learning_rate=0.001,
                                   state2vector=env.state2vector, involve_steps=True)
         learner = ReinforceLearner(agent, env, 0.05, critic=critic,
-                                   batched=True, steps=10, name=name,log_steps=logstep,rep = rep)
+                                   batched=True, steps=50, name=name,log_steps=logstep,rep = rep)
 
     elif task == "tic":
         man, env = setup_tictacteo(variation)
