@@ -412,7 +412,10 @@ class TicTacTeo(SymbolicEnvironment):
         #action_index = np.random.choice(range(self.env.action_n), p=action_prob)
         def tuple2int(t):
             return (int(t[0]), int(t[1]))
-
+        def norm(a,t):
+            for i in range(t):
+                a = a/np.sum(a)
+            return a
         invalids = self.get_invalid()
         print("invalids....",invalids)
         print("act0......",actprob)
@@ -422,28 +425,21 @@ class TicTacTeo(SymbolicEnvironment):
             ## (0,0)(0,1)...
             if tuple2int(action.terms) in invalids:
                 actprob[actidx]=0
-        print("act1.....",actprob)
-        actprob0 = actprob / np.sum(actprob)
-        print("actprob0...",actprob0)
-        actprob = softmax(actprob)
-        print("act2.....",actprob)
+        print("act1......",actprob)
+        actprob = actprob / np.sum(actprob)
+        print("act2......",actprob)
         actprob[np.isnan(actprob)] = 0
-        print("act3.....",actprob)
         acts = np.sum(actprob)
-        print("acts...",acts)
-        valids = self.get_valid()
-        if acts<1:
-            print("acts<1.......")
-            for actidx in range(self.action_n):
-            ## 0,1,2,3,4...9
-                action = self.all_actions[actidx]
-            ## (0,0)(0,1)...
-                if tuple2int(action.terms) in valids:
-                    actprob[actidx]=actprob[actidx]+(1-acts)
-        else:
+        if acts==0:
+            print("acts===0")
+            print('act3......?',actprob)
             actprob = softmax(actprob)
-            print("I dont Know....")
-
+        else:
+            actprob = norm(actprob,5)
+            if(sum(actprob)!=1):
+                print("why???????",sum(actprob),actprob)
+                actprob = norm(actprob,5)
+        
 
         action_index = np.random.choice(range(self.action_n), p=actprob)
         action = self.all_actions[action_index]
