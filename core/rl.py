@@ -128,23 +128,25 @@ class ReinforceLearner(object):
             #normact = actprob/np.sum(actprob)
             #print("normact---",normact)
             ###
-            # if env == tictactoe
+
+            
+            action_index = np.random.choice(range(self.env.action_n), p=action_prob)
+            if self.state_encoding == "terms":
+                action = self.env.action_index2atom(action_index)
+            elif self.state_encoding == "atoms":
+                action = self.agent.all_actions[action_index]
+            else:
+                if action_index<len(self.env.all_actions):
+                    action = self.env.all_actions[action_index]
+                else:
+                    action = np.random.choice(self.env.all_actions)
+                        # if env == tictactoe
             ###
             if self.env.__class__.__name__=='TicTacTeo':
                 #print('TicTacEnv----')
-                action_index, reward, finished = self.env.next_step(action_prob)
+                action_index, reward, finished = self.env.next_step(action)#(action_prob)
             else:
-                action_index = np.random.choice(range(self.env.action_n), p=action_prob)
-                if self.state_encoding == "terms":
-                    action = self.env.action_index2atom(action_index)
-                elif self.state_encoding == "atoms":
-                    action = self.agent.all_actions[action_index]
-                else:
-                    if action_index<len(self.env.all_actions):
-                        action = self.env.all_actions[action_index]
-                    else:
-                        action = np.random.choice(self.env.all_actions)
-                    reward, finished = self.env.next_step(action)
+                reward, finished = self.env.next_step(action)
             steps.append(step)
             state_history.append(self.env.state)
             reward_history.append(reward)
