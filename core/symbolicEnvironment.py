@@ -383,7 +383,7 @@ EMPTY = Predicate("empty", 2)
 OPPONENT = Predicate("opponent", 2)
 class TicTacTeo(SymbolicEnvironment):
     all_variations = ("n")
-    def __init__(self, width=3, know_valid_pos=True):
+    def __init__(self, width=3, know_valid_pos=True,case = []):
         actions = [PLACE]
         self.language = LanguageFrame(actions, extensional=[ZERO, MINE, EMPTY, OPPONENT, SUCC],
                                       constants=[str(i) for i in range(width)])
@@ -393,12 +393,12 @@ class TicTacTeo(SymbolicEnvironment):
         background.extend([Atom(SUCC, [str(i), str(i + 1)]) for i in range(width - 1)])
         background.append(Atom(ZERO, ["0"]))
         self.max_step = 50
-        init = np.zeros([3,3])
-        init[0,1]=1
-        init[2,0]=1
-        init[2,1]=-1
-        init[1,2]=-1
-        initial_state = np.zeros([3,3])
+        self.case = case
+        #init = np.zeros([3,3])
+        if len(case)==0:
+            initial_state = np.zeros([3,3])
+        else:
+            initial_state = self.diffInit()
         super(TicTacTeo, self).__init__(background, initial_state, actions)
         self.width = width
         self.all_positions = [(i, j) for i in range(width) for j in range(width)]
@@ -522,3 +522,13 @@ class TicTacTeo(SymbolicEnvironment):
         if type == "n":
             width = 3#np.zeros([3,3])
         return TicTacTeo(width)
+
+    def diffInit(self):
+        init = np.zeros([3,3])
+        pos = self.case[1]
+        for p in pos:
+            init[p]=1
+        neg = self.case[-1]
+        for n in neg:
+            init[n]=-1
+        return init

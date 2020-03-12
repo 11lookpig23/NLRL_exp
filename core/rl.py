@@ -90,7 +90,7 @@ class ReinforceLearner(object):
 
     def grad(self):
         loss_value = self.tf_loss
-        weight_decay = 0.015
+        weight_decay = 0.005
         scale = 1
         regularization = 0
         for weights in self.agent.all_variables():
@@ -124,30 +124,29 @@ class ReinforceLearner(object):
                 action_prob,result = sess.run([self.tf_action_prob, self.agent.tf_result_valuation], feed_dict={self.agent.tf_input_valuation: [valuation],self.tf_actions_valuation_indexes: [indexes]})           
             
             action_prob = action_prob[0]
-            actprob = copy.deepcopy(action_prob)
+            #actprob = copy.deepcopy(action_prob)
             #normact = actprob/np.sum(actprob)
             #print("normact---",normact)
-            action_index = np.random.choice(range(self.env.action_n), p=action_prob)
-
-            if self.state_encoding == "terms":
-                action = self.env.action_index2atom(action_index)
-            elif self.state_encoding == "atoms":
-                action = self.agent.all_actions[action_index]
-            else:
-                if action_index<len(self.env.all_actions):
-                    action = self.env.all_actions[action_index]
-                else:
-                    action = np.random.choice(self.env.all_actions)
-            steps.append(step)
-            state_history.append(self.env.state)
             ###
             # if env == tictactoe
             ###
             if self.env.__class__.__name__=='TicTacTeo':
                 #print('TicTacEnv----')
-                action_index, reward, finished = self.env.next_step(actprob)
+                action_index, reward, finished = self.env.next_step(action_prob)
             else:
-                reward, finished = self.env.next_step(action)
+                action_index = np.random.choice(range(self.env.action_n), p=action_prob)
+                if self.state_encoding == "terms":
+                    action = self.env.action_index2atom(action_index)
+                elif self.state_encoding == "atoms":
+                    action = self.agent.all_actions[action_index]
+                else:
+                    if action_index<len(self.env.all_actions):
+                        action = self.env.all_actions[action_index]
+                    else:
+                        action = np.random.choice(self.env.all_actions)
+                    reward, finished = self.env.next_step(action)
+            steps.append(step)
+            state_history.append(self.env.state)
             reward_history.append(reward)
             action_history.append(action_index)
             action_trajectory_prob.append(action_prob[action_index])
