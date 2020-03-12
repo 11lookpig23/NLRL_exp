@@ -65,7 +65,7 @@ def start_DILP(task, name, mode, logstep, rep, variation=None):
             critic = NeuralCritic([20], env.state_dim, 1.0, learning_rate=0.001,
                                     state2vector=env.state2vector, involve_steps=True)
         learner = ReinforceLearner(agent, env, 0.05, critic=critic,
-                                    batched=True, steps=50, name=name,log_steps=logstep,rep = rep)
+                                    batched=True, steps=12000, name=name,log_steps=logstep,rep = rep)
 
     elif task == "stack":
         man, env = setup_stack(variation)
@@ -98,8 +98,8 @@ def start_DILP(task, name, mode, logstep, rep, variation=None):
 
 from pprint import pprint
 if __name__ == "__main__":
-    logstep = 50
-    rep = 5
+    logstep = 800
+    rep = 100
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode')
     parser.add_argument('--task')

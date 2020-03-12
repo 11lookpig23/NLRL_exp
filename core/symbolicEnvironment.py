@@ -447,7 +447,7 @@ class TicTacTeo(SymbolicEnvironment):
         self.step += 1
         reward, finished = self.get_reward()
         if finished:
-            return reward, finished
+            return action_index,reward, finished
         valids = self.get_valid()
         if len(valids)==0:
             finished =True
@@ -522,9 +522,3 @@ class TicTacTeo(SymbolicEnvironment):
         if type == "n":
             width = 3#np.zeros([3,3])
         return TicTacTeo(width)
-'''
-if __name__ == '__main__':
-    tic = TicTacTeo()
-    r,f = tic.next_step([0.1,0.1,0.1,0.1,0.1,0.1,0.15,0.05,0.2])
-    print(r,f,"jjjjj")
-'''

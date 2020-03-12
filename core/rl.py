@@ -144,7 +144,7 @@ class ReinforceLearner(object):
             # if env == tictactoe
             ###
             if self.env.__class__.__name__=='TicTacTeo':
-                print('TicTacEnv----')
+                #print('TicTacEnv----')
                 action_index, reward, finished = self.env.next_step(actprob)
             else:
                 reward, finished = self.env.next_step(action)
@@ -264,7 +264,7 @@ class ReinforceLearner(object):
                 Stateli.append(state_history)
         unique, counts = np.unique(results, return_counts=True)
         try:
-            printval("reli,txt",np.array(Reli))
+            printval("reli.txt",np.array(Reli))
         except:
             print("Reli++++",Reli)
         try:
