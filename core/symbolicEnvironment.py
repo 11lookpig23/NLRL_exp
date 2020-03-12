@@ -410,56 +410,71 @@ class TicTacTeo(SymbolicEnvironment):
         ###
         #input = atcprob
         #action_index = np.random.choice(range(self.env.action_n), p=action_prob)
+        akt = True
         def tuple2int(t):
             return (int(t[0]), int(t[1]))
         def norm(a,t):
             for i in range(t):
                 a = a/np.sum(a)
             return a
-        invalids = self.get_invalid()
-        #print("invalids....",invalids)
-        #print("act0......",actprob)
-        for actidx in range(self.action_n):
-            ## 0,1,2,3,4...9
-            action = self.all_actions[actidx]
-            ## (0,0)(0,1)...
-            if tuple2int(action.terms) in invalids:
-                actprob[actidx]=0
-        #print("act1......",actprob)
-        actprob = actprob / np.sum(actprob)
-        #print("act2......",actprob)
-        actprob[np.isnan(actprob)] = 0
-        acts = np.sum(actprob)
-        if acts==0:
-            #print("acts===0")
-            #print('act3......?',actprob)
-            actprob = softmax(actprob)
-        else:
-            actprob = norm(actprob,5)
-            if(sum(actprob)!=1):
-                #print("why???????",sum(actprob),actprob)
-                actprob = norm(actprob,5)
         
+        if akt:
+            self.step += 1
+            reward, finished = self.get_reward()
+            if finished:
+                return 1, reward, finished
+            valids = self.get_valid()
+            if tuple2int(actprob.terms) in valids:
+                self._state[tuple2int(actprob.terms)] = 1
+            self.random_move(self.know_valid_pos)
+            return 1,reward, finished
 
-        action_index = np.random.choice(range(self.action_n), p=actprob)
-        action = self.all_actions[action_index]
-        ###
-        self.step += 1
-        reward, finished = self.get_reward()
-        if finished:
-            return action_index,reward, finished
-        valids = self.get_valid()
-        if len(valids)==0:
-            finished =True
-        if tuple2int(action.terms) in valids:
-            self._state[tuple2int(action.terms)] = 1
         else:
-            print("wulosay--------------++++++")
-        self.random_move(self.know_valid_pos)
-        valids = self.get_valid()
-        if len(valids)==0:
-            finished =True
-        return action_index, reward, finished
+            invalids = self.get_invalid()
+            #print("invalids....",invalids)
+            #print("act0......",actprob)
+            for actidx in range(self.action_n):
+                ## 0,1,2,3,4...9
+                action = self.all_actions[actidx]
+                ## (0,0)(0,1)...
+                if tuple2int(action.terms) in invalids:
+                    actprob[actidx]=0
+            #print("act1......",actprob)
+            actprob = actprob / np.sum(actprob)
+            #print("act2......",actprob)
+            actprob[np.isnan(actprob)] = 0
+            acts = np.sum(actprob)
+            if acts==0:
+                #print("acts===0")
+                #print('act3......?',actprob)
+                actprob = softmax(actprob)
+            else:
+                actprob = norm(actprob,5)
+                if(sum(actprob)!=1):
+                    #print("why???????",sum(actprob),actprob)
+                    actprob = norm(actprob,5)
+            
+
+            action_index = np.random.choice(range(self.action_n), p=actprob)
+            action = self.all_actions[action_index]
+            ###
+            self.step += 1
+            reward, finished = self.get_reward()
+            if finished:
+                return action_index,reward, finished
+            valids = self.get_valid()
+            if len(valids)==0:
+                finished =True
+            if tuple2int(action.terms) in valids:
+                self._state[tuple2int(action.terms)] = 1
+            else:
+                print("wulosay--------------++++++")
+            self.random_move(self.know_valid_pos)
+            valids = self.get_valid()
+            if len(valids)==0:
+                finished =True
+            return action_index, reward, finished
+        return 1,reward, finished
 
     def get_valid(self):
         return [(x,y) for x,y in self.all_positions if self._state[x,y]==0]

@@ -209,7 +209,7 @@ def setup_on(variation=None, templete="reduced", all_block=False):
     return man, env
 
 def setup_tictacteo(case,variation=None):
-    env = TicTacTeo(case)
+    env = TicTacTeo(case=[])
     if variation:
         env = env.vary(variation)
     maintemp = [RuleTemplate(1, True)]
